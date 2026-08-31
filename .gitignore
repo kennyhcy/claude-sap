@@ -1,0 +1,14 @@
+# 本地个人配置（含密钥/本地路径，不共享）
+# 这些文件含本地连接信息，不应进入仓库
+.mcp.json
+.systems.json
+
+# 项目产出目录：所有由本项目输出的文件都放这里，不进仓库
+workfolder/
+
+# SAP Note 缓存：本地抓取的 note JSON，仅本地查看不进仓库
+.claude/skills/sap-note/sap-notes/
+
+# 注意：
+# - .mcp.example.json 保留为示例模板，正常进仓库
+# - .claude/settings.json（团队共享配置，非 .local）正常进仓库

@@ -1,0 +1,14 @@
+{
+  "sap1": {
+    "SAP_URL": "https://sap1.url.com/",
+    "SAP_USERNAME": "username",
+    "SAP_PASSWORD": "password",
+    "SAP_CLIENT": "011"
+  },
+  "sap2": {
+    "SAP_URL": "https://sap2.url.com:44371",
+    "SAP_USERNAME": "username",
+    "SAP_PASSWORD": "password",
+    "SAP_CLIENT": "011"
+  }
+}

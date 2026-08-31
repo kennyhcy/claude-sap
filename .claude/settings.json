@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__mcp-abap-adt-b__CreateObject|mcp__mcp-abap-adt-b__UpdateObjectSource|mcp__mcp-abap-adt-b__ActivateObject",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"SAP 写操作需用户确认（原则：CreateObject/UpdateObjectSource/ActivateObject）\"}}'"
+          }
+        ]
+      }
+    ]
+  }
+}

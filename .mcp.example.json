@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mcp-abap-adt-b": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "C:\\Users\\ukh1sgh\\Documents\\Local\\Claude Project\\mcps\\mcp-abap-adt-b\\dist\\index.js"
+      ],
+      "env": {
+        "SYSTEMS_CONFIG_FILE": "C:\\Users\\ukh1sgh\\Documents\\Local\\Claude Project\\claude-sap\\.systems.json",
+        "DEFAULT_SAP_SYSTEM": "SAP1"
+      }
+    }
+  }
+}
