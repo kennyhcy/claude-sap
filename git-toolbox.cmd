@@ -12,8 +12,8 @@ REM  ====== CONFIG: edit these two lines to reuse in another project ======
 REM    REMOTE_NAME   - the git remote this script operates on
 REM    DEFAULT_BRANCH - the branch used for pull / push / compare
 REM  =====================================================================
-set "REMOTE_NAME=claude-sap"
-set "DEFAULT_BRANCH=master"
+set "REMOTE_NAME=origin"
+set "DEFAULT_BRANCH=main"
 REM ======================================================================
 
 setlocal
