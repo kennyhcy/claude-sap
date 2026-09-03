@@ -95,10 +95,3 @@ skill 按归属分四类，详见 [`clerk.md`](.claude/agents/clerk.md) 的「Sk
 
 参见 [`GIT-GUIDE.md`](GIT-GUIDE.md) 与 [`git-toolbox.cmd`](git-toolbox.cmd)。
 
-
-
-## Next Plan
-
-1, MCP 支持多系统链接
-2, MCP 支持 oData/API Call， CDS view etc.
-
