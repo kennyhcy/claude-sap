@@ -1,3 +1,4 @@
+# Readme
 # SAP Agent
 
 对 SAP S/4 HANA 系统全知全能的智能体。经 [mcp-abap-adt-b](https://github.com/kennyhcy/mcp-abap-adt-b) 连接 SAP S/4 HANA，通过内置的 agents 与 skills，提供业务问答、配置指引、业务数据查询、ABAP 开发、代码审查与端到端验证等能力。
