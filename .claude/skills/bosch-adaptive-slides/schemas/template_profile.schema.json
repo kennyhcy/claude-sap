@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Template Profile",
+  "description": "Extracted CSS, JS, protected DOM fragments, and available layouts from the HTML template.",
+  "type": "object",
+  "properties": {
+    "style_block": { "type": "string", "description": "Contents of the template <style> tag" },
+    "script_block": { "type": "string", "description": "Contents of the template <script> tag" },
+    "footer_html": { "type": "string", "description": "Protected .slide-footer HTML fragment" },
+    "logo_html": { "type": "string", "description": "Protected .slide-logo HTML fragment" },
+    "supergraphic_html": { "type": "string", "description": "Protected .slide-supergraphic HTML fragment" },
+    "viewer_html": { "type": "string", "description": "Slide viewer controls HTML fragment" },
+    "available_layouts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of detected layout class names available in the template"
+    }
+  }
+}

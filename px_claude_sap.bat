@@ -20,10 +20,13 @@ REM  Usage:
 REM    claude-resume.bat
 REM ============================================================
 
-SET https_proxy=http://127.0.0.1:3128
-SET http_proxy=http://127.0.0.1:3128
-SET HTTP
-SET NO_PROXY
+REM Load environment variables from .claud_sap.env.json.
+REM Requires PowerShell (preinstalled on Windows 10/11). If the file is
+REM missing or invalid JSON, we warn and continue without proxy settings.
+for /f "usebackq delims=" %%E in (`powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$e = Get-Content -Raw '%~dp0.claud_sap.env.json' | ConvertFrom-Json; $e.PSObject.Properties | ForEach-Object { 'SET ' + [char]34 + $_.Name + '=' + $_.Value + [char]34 }"`) do (
+    %%E
+)
 
 @cls
 

@@ -58,6 +58,10 @@ description: 经 MCP 实测确认存在的 SAP EWM 常用表(仓位/存储类型
 **系统版本**
 - `CVERS` Software Component Versions(字段 `component`/`release`/`extrelease`体现 SP/`comp_type`)。查 S4CORE release/SP 判断 Note 适用性: `component = 'S4CORE'`。注: 实际无 COMPID/DESC_TEXT/VERSION 字段，SP 由 `extrelease` 体现。
 
+**Transport request**
+- `E070` 每个传输号属于哪个用户, 所属父传输号. 传输和也可以称作请求号, TR, 传输请求.
+- `E071` 传输请求内包含的 objects, object 包括表,程序,类等等.
+
 ## 表间关系速查
 
 - **WT ↔ WO**: WT 表(`ORDIM_O`/`ORDIM_C`)的 `who` 字段 = `/SCWM/WHO` 的 WO 号;一个 WO 可含多个 WT,WT 可能部分 open 部分 confirmed(故查 WO 时两张 ORDIM 表都要查)。

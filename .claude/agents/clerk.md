@@ -21,51 +21,21 @@ tools: Read, Edit, Write, Glob, Grep
 
 skill 新增/重命名/删除时，同步更新对应 agent 的 Skill 索引。判断依据 = skill 名前缀 + description。
 
-### 1. skill 归属判定
-
-| 类别 | skill | 归属 agent |
-|---|---|---|
-| 模块专属 | `sap-ewm-*` / `sap-mm-*` / `sap-sd-*` / `sap-pp-*` / `sap-fi-*` / `sap-co-*` | 对应模块顾问 |
-| 模块专属（无前缀） | 如 `br-write-ps` | 按 description 归对应模块顾问（EWM） |
-| 跨模块通用 | `sap-basic-data-query`、`sap-note`、`sap-note-search` | 全部 6 个模块顾问 |
-| 技术/工具 | `abap-adt-write` | `abaper`、`tester` |
-| 技术/工具 | `abap-test-verify` | `tester` |
-| 技术/工具 | `abap-code-review` | `code-reviewer`（模块顾问可弱关联按需） |
-| 技术/工具 | `mcp-adt-pitfalls` | `code-reviewer` |
-| 业务数据查询 | `sap-ewm-business-data-query` | `sap-ewm-function-consultant` + `abaper` + `code-reviewer` + `tester` |
-
-### 2. 新增 skill 同步
+### 1. 新增 skill 同步
 
 1. 判定归属。
 2. 到对应 agent 的 `## Skill 索引` 表加行（`| 场景 | \`skill名\` |`，场景照 description 提炼）。通用 skill 6 个模块顾问各加一行。
 3. 检查 agent 正文是否需呼应新增 skill 名。
 
-### 3. 重命名 / 删除
+### 2. 重命名 / 删除
 
 - **重命名**：Grep 全量排查旧名（表格行 + 正文），逐一更新。
 - **删除**：所有 agent 索引表删行 + 正文提及清理。
 
-### 4. 索引与正文一致性自检
+### 3. 索引与正文一致性自检
 
 - 正文提及某 skill → 索引表必有对应行。
 - `sap-note` 与 `sap-note-search` 配对：模块顾问索引统一写 `sap-note` / `sap-note-search`，全项目口径一致。
-
-### 5. 不擅改 frontmatter
-
-只动「Skill 索引」章节及相关正文，不改 frontmatter（除非主 Claude 明确要求）。
-
-### 6. 新增 agent 预置
-
-看 frontmatter `tools` 是否含 `Skill`：不含（如 clerk）不建索引；含则按下表预置，并补建完整「## Skill 索引」章节（表头 + 各行 + 脚注「通过 `Skill` 工具调用，`skill` 参数填名不带斜杠，禁止臆测」）。
-
-| 角色 | 通用 | 必备 |
-|---|---|---|
-| 模块顾问 | `sap-note`、`sap-note-search`、`sap-basic-data-query` | `abap-code-review`(弱) + 本模块全部专属 skill（按 `sap-XX-*` 前缀）；无专属 skill 时注明「待建，依赖 MCP 直查与官方文档」 |
-| abaper | `sap-note` | `abap-adt-write`、`abap-code-review`、`sap-ewm-business-data-query` |
-| code-reviewer | `sap-note` | `abap-code-review`、`mcp-adt-pitfalls`、`sap-ewm-business-data-query` |
-| tester | `sap-note` | `abap-test-verify`、`abap-adt-write`、`sap-ewm-business-data-query` |
-
-与第 2 节对称：新增 skill 往各 agent 加行，新增 agent 按本表预置。
 
 ## Truthfulness Rule
 

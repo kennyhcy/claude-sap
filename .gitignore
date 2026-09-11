@@ -2,6 +2,7 @@
 # 这些文件含本地连接信息，不应进入仓库
 .mcp.json
 .systems.json
+px_claude_sap_bosch_skillhub.bat
 
 # 项目产出目录：所有由本项目输出的文件都放这里，不进仓库
 workfolder/
@@ -12,3 +13,6 @@ workfolder/
 # 注意：
 # - .mcp.example.json 保留为示例模板，正常进仓库
 # - .claude/settings.json（团队共享配置，非 .local）正常进仓库
+
+# Claude SAP 启动环境变量（含密钥，不共享）
+.claud_sap.env.json

@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Slide Manifest",
+  "description": "Structured definition of the slide deck planned by the agent.",
+  "type": "object",
+  "properties": {
+    "deck_metadata": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "author": { "type": "string" },
+        "department": { "type": "string" },
+        "date": { "type": "string" },
+        "language": { "type": "string" },
+        "audience": { "type": "string" },
+        "duration_minutes": { "type": "number" },
+        "output_format": { "type": "string" },
+        "year": { "type": "string" }
+      }
+    },
+    "image_assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "src": { "type": "string" },
+          "alt": { "type": "string" },
+          "width_px": { "type": ["integer", "null"] },
+          "height_px": { "type": ["integer", "null"] },
+          "aspect_ratio": { "type": ["number", "null"] },
+          "orientation": { "type": "string", "enum": ["landscape", "portrait", "square"] },
+          "context_heading": { "type": "string" },
+          "keywords": { "type": "array", "items": { "type": "string" } },
+          "source": { "type": "string" },
+          "used_on_slides": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "slides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "topic": { "type": "string" },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "layout": { "type": "string", "enum": ["cover-simple", "section-banner", "two-col", "three-col", "panel", "cards", "number-grid", "timeline", "matrix-wrap", "arch", "flow", "chart-grid", "checklist", "roadmap", "end-page", "image-hero", "image-text-split", "image-comparison", "image-grid", "image-caption-focus", "image-annotated", "default"] },
+          "layout_variant": { "type": "string" },
+          "content_html": { "type": "string" },
+          "source_sections": { "type": "array", "items": { "type": "string" } },
+          "image": {
+            "type": "object",
+            "properties": {
+              "selected_id": { "type": ["string", "null"] },
+              "selected_src": { "type": ["string", "null"] },
+              "intent": { "type": "string" },
+              "balance": { "type": "string" },
+              "image_count": { "type": "integer" },
+              "selection_score": { "type": "number" },
+              "alternatives_rejected": { "type": "array", "items": { "type": "object" } }
+            }
+          },
+          "visuals": { "type": "array", "items": { "type": "object" } },
+          "notes": { "type": "array", "items": { "type": "string" } },
+          "validation": {
+            "type": "object",
+            "properties": {
+              "overflow": { "type": "boolean" },
+              "overlap": { "type": "boolean" },
+              "brand_pass": { "type": "boolean" },
+              "layout_quality_pass": { "type": "boolean" }
+            }
+          }
+        },
+        "required": ["topic", "title", "layout", "content_html"]
+      }
+    }
+  },
+  "required": ["slides"]
+}
