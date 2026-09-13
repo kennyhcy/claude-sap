@@ -33,6 +33,7 @@ MCP server 的安装路径因环境而异，不要在文档里写死绝对路径
 | 真实 package 的 PUT | 必须带 `corrNr`，否则报 `Parameter corrNr could not be found` |
 | POST 创建后取 ETag | POST 创建后响应**无 ETag**，必须 GET `/source/main` 取 |
 | `If-Match: *` | xl7 **拒绝** `If-Match: *` |
+| 直调 axios 的 GET 漏 `sap-client` | handler 绕过 `makeAdtRequest` 的请求（update/create 取 ETag 的 GET）必须带 `params: {'sap-client': client}`，否则登到系统默认 client：用户不在该 client 时返回 401「Anmeldung fehlgeschlagen」登录页（读正常、写 401 即此症）。2026-09-13 已修 |
 | 改源码后状态 | 存为 inactive，需调 `ActivateObject` |
 
 ## 底层契约参考
