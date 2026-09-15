@@ -15,7 +15,7 @@
 claude-sap/
 ├── .claude/
 │   ├── agents/          # 10 个角色 agent 定义（.md）
-│   ├── skills/          # 11 个 skill（每个含 SKILL.md + 可选 references/）
+│   ├── skills/          # 8 个 skill（每个含 SKILL.md + 可选 references/）
 │   ├── settings.json    # PreToolUse hook：写操作工具强制 ask 拦截
 │   └── hooks/
 ├── CLAUDE.md            # 项目主指令（路由、规范、授权红线）
@@ -51,15 +51,13 @@ claude-sap/
 
 \---
 
-## Skills（11 个）
+## Skills（8 个）
 
 skill 按归属分四类，详见 [`clerk.md`](.claude/agents/clerk.md) 的「Skill-Agent 索引同步规则」：
 
 |类别|skill|说明|
 |-|-|-|
-|EWM 专属|`sap-ewm-business-data-query`|经 MCP 读取 EWM 业务数据（表查询配方、字段陷阱）|
-|EWM 专属|`sap-ewm-qm-defect`|分布式 EWM QM defect 流程口径|
-|EWM 专属|`sap-ewm-replenishment`|EWM 补货系统知识（6 表决定链路）|
+|EWM 专属|`sap-ewm`|EWM 知识与业务数据查询总索引（SKILL.md 只作索引，四块流程细节在 references/ 下：表查询实操/补货/盘点/QM defect）|
 |EWM 专属|`br-write-ps`|EWM BR 文档 Product Specification（PS）撰写|
 |跨模块通用|`sap-basic-data-query`|SAP 系统通用知识库（IDoc/OData/BAPI/CDS View/SPRO 等）|
 |跨模块通用|`sap-note`|读取 SAP Note / KBA 全文（经 `get\\\_sapnote.ps1` 脚本）|

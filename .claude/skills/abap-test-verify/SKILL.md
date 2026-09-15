@@ -47,7 +47,7 @@ description: ABAP/MCP 改动的端到端验证实操——Transport 归属验证
 
 ## 验证业务结果（EWM 业务表）
 
-验证业务结果时需要查 **EWM 业务表**（`/SCWM/ORDIM_O`、`/SCWM/AQUA`、`/SCDL/DB_PROCI_*` 等仓库任务/库存/交货/仓位表）**自己直接用 `GetTableContents` 查**，不必转交其他 agent。EWM 表知识（表关系/字段语义等深层疑问）的**权威**是 `sap-ewm-function-consultant`，遇到拿不准的表含义可向它请教，但"查个数据验证结果"这类事自己做，不要凭空猜表结构。查表实操细节见 `sap-ewm-business-data-query` skill。
+验证业务结果时需要查 **EWM 业务表**（`/SCWM/ORDIM_O`、`/SCWM/AQUA`、`/SCDL/DB_PROCI_*` 等仓库任务/库存/交货/仓位表）**自己直接用 `GetTableContents` 查**，不必转交其他 agent。EWM 表知识（表关系/字段语义等深层疑问）的**权威**是 `sap-ewm-function-consultant`，遇到拿不准的表含义可向它请教，但"查个数据验证结果"这类事自己做，不要凭空猜表结构。查表实操细节见 `sap-ewm` skill。
 
 ## 联动校验测试
 

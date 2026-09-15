@@ -1,5 +1,12 @@
 # 变更记录（CHANGELOG）
 
+## [未发布] - 2026-09-14
+
+### Skills（`.claude/skills/`）
+- **合并 4 个 EWM skill 为单一 `sap-ewm`**：`sap-ewm-business-data-query`、`sap-ewm-replenishment`、`sap-ewm-physicalinventory`、`sap-ewm-qm-defect` -> `sap-ewm/`
+  - SKILL.md 精简到约 30 行，只作索引与通用守则；四块流程细节全部下沉到 `references/`（5 个 reference 文件原样迁移，内容未改）
+- **同步更新引用**：`abaper.md`（2 处）、`abap-test-verify`、`sap-abc-reclassification`、`CLAUDE.md`（工具节）、`README.md`（skills 清单 11 -> 8 个）
+
 ## [v0.1.0] - 2026-08-16
 
 - **版本号**：v0.1.0

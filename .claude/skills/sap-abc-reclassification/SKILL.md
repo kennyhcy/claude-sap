@@ -29,7 +29,7 @@ description: 按仓库任务(WT)出现频率对物料主数据 ABC 标识做重�
 
 ## 1. 读取仓库任务
 
-遵循 `sap-ewm-business-data-query` skill 的全部规则(表验证、where/fields 大小写、空结果验证法)。双表配方:
+遵循 `sap-ewm` skill 的全部规则(表验证、where/fields 大小写、空结果验证法)。双表配方:
 
 ```
 table: /scwm/ordim_o   (open)
