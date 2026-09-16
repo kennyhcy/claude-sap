@@ -6,7 +6,7 @@ REM missing or invalid JSON, we warn and continue without proxy settings.
 REM ============================================================
 
 for /f "usebackq delims=" %%E in (`powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "$e = Get-Content -Raw '%~dp0.claud_sap.env.json' | ConvertFrom-Json; $e.PSObject.Properties | ForEach-Object { 'SET ' + [char]34 + $_.Name + '=' + $_.Value + [char]34 }"`) do (
+    "$e = Get-Content -Raw '%~dp0.env.json' | ConvertFrom-Json; $e.PSObject.Properties | ForEach-Object { 'SET ' + [char]34 + $_.Name + '=' + $_.Value + [char]34 }"`) do (
     %%E
 )
 

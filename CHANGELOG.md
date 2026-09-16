@@ -1,6 +1,21 @@
 # 变更记录（CHANGELOG）
 
-## [未发布] - 2026-09-14
+## [v1.1.0] - 2026-09-14
+
+### Skills
+- 新增 Jira(Track & Release) integration. jira-query. 使用环境变量 JIRA_BASE_URL, JIRA_USERNAME, JIRA_TOKEN
+- 新增 MF ALM integration, 实现读取 defect, 添加 comments 等操作. 使用环境变量 ALM_BASE_URL, ALM_CLIENT_ID, ALM_CLIENT_SECRET, ALM_DOMAIN, ALM_PROJECT, ALM_USER.
+- 新增 docupedia-read, 读取 docupedia 内容, 转换为 md 文件 保存到 docupedia 目录.
+
+### Workflows
+- tr-ckeck: 读取 SAP 系统内部 TR 包含的 objects, 用于跨系统比较.
+- kb-qa: 信息检索流程, 用户提出知识性问题, 先读取项目内 docupedia 内容, 再根据环境变量 WIKI_DIR 读取本机知识库( obsidian 文件仓库), 未命中则通过 sap-note 查找 SAP 相关信息.
+
+### Other Tools
+- 项目目录新增 .env.json 文件用于保存和管理本项目所使用的环境变量, 可替代操作系统上的用户层级环境变量配置. 必须使用 px_claude_sap.bat 启动 claude 才会注入.
+
+
+## [v1.0.0] - 2026-09-14
 
 ### Skills（`.claude/skills/`）
 - **合并 4 个 EWM skill 为单一 `sap-ewm`**：`sap-ewm-business-data-query`、`sap-ewm-replenishment`、`sap-ewm-physicalinventory`、`sap-ewm-qm-defect` -> `sap-ewm/`

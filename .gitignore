@@ -3,7 +3,7 @@
 # 这些文件含本地连接信息，不应进入仓库
 .mcp.json
 .systems.json
-.claud_sap.env.json
+.env.json
 
 # 项目产出目录：所有由本项目输出的文件都放这里，不进仓库
 workfolder/
