@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Docupedia (Confluence) 批量抓取 → docupedia/ 知识库
+"""Docupedia (Confluence) 批量抓取 → $DOCUPEDIA_FOLDER 知识库
 
 用法（在项目根目录运行）:
   python batch_grab.py tree <pageId>        # 递归列出子页面树（标记含下级的类目录页）
@@ -7,6 +7,7 @@
 
 环境变量:
   JIRA_TOKEN          必填，Bearer PAT（Jira 的 PAT 对 Docupedia 同域有效）
+  DOCUPEDIA_FOLDER    必填，md 落盘目录（.env.json 配置）
   DOCUPEDIA_DELAY     请求间隔秒数，默认 4（限流时调大）
   TMP                 JSON 缓存目录（默认系统 temp），按 pageId 缓存可断点续传
 """
@@ -16,7 +17,7 @@ import urllib.request
 API = 'https://inside-docupedia.bosch.com/confluence/rest/api/content'
 DELAY = float(os.environ.get('DOCUPEDIA_DELAY', '4'))
 TMP = os.environ.get('TMP', '/tmp')
-OUT_DIR = os.path.join(os.getcwd(), 'docupedia')
+OUT_DIR = os.environ.get('DOCUPEDIA_FOLDER', '')
 
 
 def api_json(url):
@@ -98,6 +99,8 @@ def cmd_tree(pid, depth=0):
 
 
 def cmd_grab(ids_file):
+    if not OUT_DIR:
+        sys.exit('ERROR: DOCUPEDIA_FOLDER 未设置')
     os.makedirs(OUT_DIR, exist_ok=True)
     ids = [l.strip() for l in open(ids_file, encoding='utf-8') if l.strip()]
     for pid in ids:

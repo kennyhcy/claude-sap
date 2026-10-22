@@ -7,7 +7,11 @@
 
 # 项目产出目录：所有由本项目输出的文件都放这里，不进仓库
 workfolder/
-docupedia/
+
+# KB 向量检索：venv 与索引为本地生成物，脚本 kb/kb_search.py 正常入库
+kb/.venv/
+kb/index/
+kb/__pycache__/
 
 # SAP Note 缓存：本地抓取的 note JSON，仅本地查看不进仓库
 .claude/skills/sap-note/sap-notes/
@@ -18,3 +22,6 @@ docupedia/
 
 
 
+
+# 本地 Windows 快捷方式（含本机路径）
+px_claude_sap.lnk

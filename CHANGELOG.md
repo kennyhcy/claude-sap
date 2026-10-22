@@ -1,15 +1,52 @@
-# 变更记录（CHANGELOG）
+# Changelog
+
+## [v1.2.0] - 2026-10-22
+
+### Skills (unified `br-` / `defect-` prefixes; all SKILL.md rewritten in English)
+
+Renames:
+- `obsidian-br` -> `br-note`, `obsidian-defect` -> `defect-note`, `obsidian-br-sync` -> `br-download`
+- `obsidian-work-analyze` split into `br-analyze` (BR section paradigm: Scope/PR/Analysis/PS) + `defect-analyze` (Defect section paradigm: Issue/Analysis/Root cause/Solution); the original skill was removed
+- `jira-query` -> `br-jira-query`, `alm-defect-query` -> `defect-alm-query`
+- `docupedia-read` -> `docupedia-download`; SKILL.md rewritten (download/KB-save focus, env vars, rate-limit & children-macro traps); removed stale `scripts/__pycache__`
+
+Rewrites (per the new `skill-writer` conventions: English, concise, no Obsidian wording):
+- `br-note`, `defect-note`, `br-download`, `br-analyze`, `defect-analyze`: note folders referenced only via the env vars `BR_FOLDER` / `DEFECT_FOLDER` (notes are storage-agnostic)
+- `br-jira-query`, `defect-alm-query`: renamed and rewritten per the same conventions
+- `br-download`: wording fix in step 4 — note skeleton creation is described as "following the br-note skill's template" instead of "via the br-note skill" (layering rule: skills do not call other skills; behavior unchanged)
+- De-Obsidian sweep (env-var-configured folders only, no tool-specific wording): `docupedia-download`, `sap-error-explain`, `kb-search` SKILL.md files; `work-list.js` / `work-analyze.js` descriptions & prompts; README (kb-search row, Quick Start env note)
+
+New:
+- Added `skill-writer`, a meta-skill for writing/rewriting skills: unifies skill format rules (English, concise, two-field frontmatter), naming rules (shared prefix per task type), and a mandatory sync checklist (CHANGELOG / env vars / gitignore / sample files / cross-references)
+- Added `kb-search` + `kb/kb_search.py`: local vector semantic search & KB Q&A over the knowledge base root `$KB_VAULT` (local Qwen3 embedding, corpus stays local)
+
+### Workflows
+- `my-work.js` -> `work-list.js` (log-level note sync only) + new `work-analyze.js` (five-step BR/defect analysis); hardcoded skill paths updated for all renames (logic unchanged); `kb-qa.js` workflow removed (superseded by the `kb-search` skill)
+
+### Docs
+- CLAUDE.md and agent definitions (`abaper`, `clerk`) rewritten in English (concise, normative)
+- README rewritten in English and aligned with the actual repository state (2 agents, 19 skills, 3 workflows; fixed stale skill list and `.mcp.example.json` filename)
+
+### Env vars (⚠️ update local `.env.json` accordingly)
+- `OBSIDIAN_BR_FOLDER` -> `BR_FOLDER`, `OBSIDIAN_DEFECT_FOLDER` -> `DEFECT_FOLDER`
+- `OBSIDIAN_VAULT` -> `KB_VAULT` (storage-agnostic name; consumers: `kb/kb_search.py`, `kb-search` skill, README; local `.env.json` already renamed)
+- `DOCUPEDIA_FOLDER` unchanged
+
+### Other
+- `.gitignore`: added `kb/.venv/`, `kb/index/`, `kb/__pycache__/`
+- Cross-references updated for all renames: README skills table, `kb/kb_search.py` comment, `kb-search` / `sap-error-explain` SKILL.md
 
 ## [v1.1.0] - 2026-09-14
 
 ### Skills
 - 新增 Jira(Track & Release) integration. jira-query. 使用环境变量 JIRA_BASE_URL, JIRA_USERNAME, JIRA_TOKEN
-- 新增 MF ALM integration, 实现读取 defect, 添加 comments 等操作. 使用环境变量 ALM_BASE_URL, ALM_CLIENT_ID, ALM_CLIENT_SECRET, ALM_DOMAIN, ALM_PROJECT, ALM_USER.
+- 新增 MF ALM integration (skill alm-defect-query, 2026-10-21 由 alm-defects 更名), 实现读取 defect, 添加 comments 等操作. 使用环境变量 ALM_BASE_URL, ALM_CLIENT_ID, ALM_CLIENT_SECRET, ALM_DOMAIN, ALM_PROJECT, ALM_USER.
 - 新增 docupedia-read, 读取 docupedia 内容, 转换为 md 文件 保存到 docupedia 目录.
 
 ### Workflows
 - tr-ckeck: 读取 SAP 系统内部 TR 包含的 objects, 用于跨系统比较.
-- kb-qa: 信息检索流程, 用户提出知识性问题, 先读取项目内 docupedia 内容, 再根据环境变量 WIKI_DIR 读取本机知识库( obsidian 文件仓库), 未命中则通过 sap-note 查找 SAP 相关信息.
+- kb-qa: (已改写为 skill obsidian-kb) 信息检索流程, 用户提出知识性问题, 先读取项目内 docupedia 内容, 再根据环境变量 OBSIDIAN_KB_FOLDER 读取 Obsidian 知识库目录 6.EWM Trade Docupedia, 未命中则通过网络搜索查找.
+- my-work: (2026-10-21 改名并简化为 work-list) 工作检查. 拉取 Jira 未完成 BR 与 ALM 未 closed defect, log 级同步到 Obsidian 笔记 (只追加 log 行, 缺失则创建骨架); 章节分析与回写拆分到 work-analyze workflow.
 
 ### Other Tools
 - 项目目录新增 .env.json 文件用于保存和管理本项目所使用的环境变量, 可替代操作系统上的用户层级环境变量配置. 必须使用 px_claude_sap.bat 启动 claude 才会注入.

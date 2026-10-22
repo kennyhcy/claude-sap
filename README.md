@@ -1,96 +1,103 @@
-# Readme
 # SAP Agent
 
-对 SAP S/4 HANA 系统全知全能的智能体。经 [mcp-abap-adt-b](https://github.com/kennyhcy/mcp-abap-adt-b) 连接 SAP S/4 HANA，通过内置的 agents 与 skills，提供业务问答、配置指引、业务数据查询、ABAP 开发、代码审查与端到端验证等能力。
+An agent with full knowledge of the SAP S/4 HANA system. Connected to SAP S/4 HANA via [mcp-abap-adt-b](https://github.com/kennyhcy/mcp-abap-adt-b), it provides business Q&A, configuration guidance, business data queries, ABAP development, and BR/defect analysis through built-in agents, skills, and workflows.
 
-* **技术栈**：ABAP + TypeScript/MCP
-* **运行环境**：Claude Code（CLI / Desktop / Web / IDE 插件）
-* **MCP 连接**：[mcp-abap-adt-b](https://github.com/kennyhcy/mcp-abap-adt-b) stdio，经 `node dist/index.js` 启动，接入示例见 `.mcp.json.example.txt`）
+* **Tech stack**: ABAP + TypeScript/MCP
+* **Runtime**: Claude Code (CLI / Desktop / Web / IDE extension)
+* **MCP connection**: [mcp-abap-adt-b](https://github.com/kennyhcy/mcp-abap-adt-b) stdio, started via `node dist/index.js`; see `.mcp.example.json` for a connection example
 
 \---
 
-## 目录结构
+## Directory Structure
 
 ```
 claude-sap/
 ├── .claude/
-│   ├── agents/          # 10 个角色 agent 定义（.md）
-│   ├── skills/          # 8 个 skill（每个含 SKILL.md + 可选 references/）
-│   ├── settings.json    # PreToolUse hook：写操作工具强制 ask 拦截
-│   └── hooks/
-├── CLAUDE.md            # 项目主指令（路由、规范、授权红线）
-├── GIT-GUIDE.md         # 简明 Git 操作指南
-├── CHANGELOG.md         # 变更记录
-├── .mcp.json.example.txt# MCP 接入示例
+│   ├── agents/          # 2 agent definitions (abaper, clerk)
+│   ├── skills/          # 19 skills (each with SKILL.md + optional references/, scripts/)
+│   ├── workflows/       # 3 workflow orchestration scripts (work-list / work-analyze / tr-check)
+│   └── settings.json    # PreToolUse hook: SAP write-operation tools force "ask" interception
+├── CLAUDE.md            # Project master instructions (routing, conventions, authorization red lines)
+├── CHANGELOG.md         # Change log
+├── .mcp.example.json    # MCP connection example (copy to .mcp.json)
+├── .env.example.json    # Env var template (copy to .env.json)
+├── .systems.example.json# SAP system connection template (copy to .systems.json)
 ├── .gitignore
-├── px\\\_claude\\\_sap.bat    # Claude 启动脚本
-├── px\\\_cmd\\\_here.bat      # 当前目录开 cmd
-└── git-toolbox.cmd      # Git 工具脚本
+├── px_claude_sap.bat    # Claude launcher script (injects .env.json)
+├── px_cmd_here.bat      # Open cmd in current directory
+└── git-toolbox.bat      # Git utility script
 ```
 
-> 产出目录 `workfolder/` 已纳入 `.gitignore`，所有运行时输出文件存放于此，不纳入版本管理。
+> The output directory `workfolder/` is gitignored; all runtime output files go there and are not version-controlled. Local-only config files (`.mcp.json`, `.env.json`, `.systems.json`) are also gitignored; commit only their `*.example.json` counterparts.
 
 \---
 
-## Agents（10 个）
+## Agents (2)
 
-按角色分流，由主 Claude 依据 frontmatter `description` 派工：
+Routed by role; the main Claude dispatches based on frontmatter `description`:
 
-|类别|agent|职责|
+|Agent|Responsibility|
+|-|-|
+|`abaper`|Senior ABAP development expert: code analysis, logic tracing, creating/modifying/activating ABAP objects via mcp-abap-adt-b tools|
+|`clerk`|Documentation clerk: writes/maintains agent & skill .md files, CLAUDE.md, reference files, memory files; consistency only, no code or business data|
+
+\---
+
+## Skills (19)
+
+Skills serving the same task type share one prefix (`br-*` / `defect-*` / `sap-*` / `kb-*` / `bosch-*`); ownership and index rules are described in the "Skill-Agent 索引同步规则" section of [`clerk.md`](.claude/agents/clerk.md). Multi-skill orchestration lives in `.claude/workflows/`:
+
+|Category|Skill|Description|
 |-|-|-|
-|文档|`clerk`|撰写/维护所有 agent 与 skill 的 .md、CLAUDE.md、reference 文件|
-|开发|`abaper`|ABAP 代码创建/修改/激活（含写操作工具）|
-|审查|`code-reviewer`|代码 diff 审查（只读不改）|
-|验证|`tester`|端到端验证（含写操作工具）|
-|顾问|`sap-ewm-function-consultant`|仓储管理 / 仓库任务 / 补货 / EWM 主数据与业务数据|
-|顾问|`sap-mm-function-consultant`|采购 / 库存 / 物料与供应商主数据|
-|顾问|`sap-sd-function-consultant`|销售 / 交货 / 开票 / 定价 / 客户主数据|
-|顾问|`sap-pp-function-consultant`|生产计划 / BOM / 工艺路线 / 工作中心 / MRP / 生产订单|
-|顾问|`sap-fi-function-consultant`|财务会计 / 总账 / 应收应付 / 资产 / 凭证|
-|顾问|`sap-co-function-consultant`|管理会计 / 成本中心 / 利润中心 / 内部订单 / 产品成本 / CO-PA|
+|BR/defect work|`br-note` / `defect-note`|Create & find BR / Defect notes under `$BR_FOLDER` / `$DEFECT_FOLDER`|
+|BR/defect work|`br-download`|Download a BR's WB docx from SharePoint and incrementally sync it into the note|
+|BR/defect work|`br-analyze` / `defect-analyze`|Section paradigm & write rules for BR / Defect analysis results|
+|Integration|`br-jira-query`|Intranet Jira issue read, JQL search, comment append|
+|Integration|`defect-alm-query`|Bosch ALM 24 defect read/write (curl + session cookie)|
+|Integration|`docupedia-download`|Download Docupedia pages and save them as KB md files|
+|SAP knowledge/query|`sap-ewm`|EWM knowledge & business data query master index (details in references/)|
+|SAP knowledge/query|`sap-basic-data-query`|SAP cross-module general knowledge (IDoc/OData/BAPI/CDS View/SPRO etc.)|
+|SAP knowledge/query|`sap-error-explain`|Explain SAP/EWM error messages to key users|
+|SAP knowledge/query|`sap-abc-reclassification`|Reclassify material ABC indicators by warehouse-task frequency|
+|SAP knowledge/query|`sap-note` / `sap-note-search`|SAP Note / KBA full-text read (get_sapnote.ps1) and keyword search|
+|SAP knowledge/query|`abap-adt-write`|mcp-abap-adt write tool practice (Create/Update/Activate)|
+|Knowledge base|`kb-search`|Local vector semantic search & KB Q&A over the local knowledge base (`$KB_VAULT`)|
+|Bosch generic|`bosch-adaptive-slides`|Markdown to Bosch-branded HTML/PPTX/PDF slides|
+|Bosch generic|`bosch-skillhub`|Bosch SkillHub skill find/download/upload|
+|Meta skill|`skill-writer`|Conventions & sync checklist for writing/rewriting skills|
+
+## Workflows (3)
+
+|Workflow|Description|
+|-|-|
+|`work-list`|Pull open BRs (Jira) & defects (ALM), incrementally sync their status/replies into the notes' log blocks, and return the open list|
+|`work-analyze`|Analyze one open BR/defect in five steps: sync+read note → KB retrieval → deep-dive analysis → write note sections → summarize & draft reply (publishing requires user confirmation)|
+|`tr-check`|Inspect a transport request's contents (E070/E071/E07T/VRSD) in parallel across multiple SAP systems|
 
 \---
 
-## Skills（8 个）
+## Core Conventions
 
-skill 按归属分四类，详见 [`clerk.md`](.claude/agents/clerk.md) 的「Skill-Agent 索引同步规则」：
+1. **🔴 Code create/modify requires prior user authorization**: any `CreateObject` / `UpdateObjectSource` / `ActivateObject` on the SAP system must be approved by the user first. The PreToolUse hook in `.claude/settings.json` forces `ask` for these three tools.
+2. **No guessing technical objects**: prompts describe business goals, never unverified table/field/class/FM names; verify via MCP first when a concrete object must be referenced.
+3. **Read the full SKILL.md before invoking a skill**: never infer its rules from the injected description alone. For EWM knowledge & data queries, `sap-ewm` is the unified entry point.
+4. **Layering**: a skill performs one basic operation (no skill-to-skill calls); a workflow only orchestrates steps; multi-skill operations are implemented as workflows.
 
-|类别|skill|说明|
-|-|-|-|
-|EWM 专属|`sap-ewm`|EWM 知识与业务数据查询总索引（SKILL.md 只作索引，四块流程细节在 references/ 下：表查询实操/补货/盘点/QM defect）|
-|EWM 专属|`br-write-ps`|EWM BR 文档 Product Specification（PS）撰写|
-|跨模块通用|`sap-basic-data-query`|SAP 系统通用知识库（IDoc/OData/BAPI/CDS View/SPRO 等）|
-|跨模块通用|`sap-note`|读取 SAP Note / KBA 全文（经 `get\\\_sapnote.ps1` 脚本）|
-|跨模块通用|`sap-note-search`|按关键词搜 SAP Note / KBA 编号|
-|技术/工具|`abap-adt-write`|mcp-abap-adt 写入工具实操（Create/Update/Activate）|
-|技术/工具|`abap-test-verify`|ABAP/MCP 改动端到端验证（E070/E071/TADIR）|
-|技术/工具|`abap-code-review`|ABAP 代码静态审查（Clean ABAP 规范）|
-|技术/工具|`mcp-adt-pitfalls`|mcp-abap-adt 项目已知坑清单（TS/MCP）|
+See [`CLAUDE.md`](CLAUDE.md) for details.
 
 \---
 
-## 核心规范
+## Quick Start
 
-1. **🔴 代码创建/修改须先经用户授权**：凡 `CreateObject` / `UpdateObjectSource` / `ActivateObject`，一律先汇总至主 Claude 报请用户授权，获准后方可执行。`.claude/settings.json` 的 PreToolUse hook 对这三项工具强制返回 `ask`，弹窗由用户确认。
-2. **模块顾问路由**：按业务模块分流，跨模块问题同条消息并行派工；模块归属不明按最接近模块派工，必要时转派。
-3. **禁止臆测技术对象**：派工 prompt 描述业务目标，不指定未核实的表名/字段名/类名/FM 名；确需引用某对象时先经 MCP 实测确认。
-4. **Skill 调用前必读 SKILL.md 全文**：不得仅凭系统注入的 description 推断其规则。
-
-详见 [`CLAUDE.md`](CLAUDE.md)。
-
-\---
-
-## 快速开始
-
-1. 安装 Claude Code（CLI / Desktop / IDE 插件任一）。
-2. 复制 `.mcp.json.example.txt` 为 `.mcp.json`，将 `args` 路径改为你本地 mcp-abap-adt 的 `dist/index.js` 绝对路径。
-3. 确保已登录 SAP S/4 HANA（mcp-abap-adt 的连接配置）。
-4. 运行 `px\\\_claude\\\_sap.bat`（或在项目目录启动 Claude Code）。
-5. 在对话中直接提问，主 Claude 会自动路由到对应 agent。
+1. Install Claude Code (CLI / Desktop / IDE extension, any one).
+2. Copy `.mcp.example.json` to `.mcp.json` and change the `args` path to the absolute path of your local mcp-abap-adt `dist/index.js`.
+3. Copy `.env.example.json` to `.env.json` and fill in your credentials (Jira/ALM tokens, knowledge-base folders `$KB_VAULT`/`$BR_FOLDER`/`$DEFECT_FOLDER`/`$DOCUPEDIA_FOLDER`, proxy).
+4. Make sure you are logged on to SAP S/4 HANA (mcp-abap-adt connection config in `.systems.json`).
+5. Run `px_claude_sap.bat` (or start Claude Code in the project directory) so the env vars are injected.
+6. Ask questions in the conversation; the main Claude routes automatically to the proper agent or workflow.
 
 \---
 
-## Git 操作
+## Git Operations
 
-参见 [`GIT-GUIDE.md`](GIT-GUIDE.md) 与 [`git-toolbox.cmd`](git-toolbox.cmd)。
-
+See [`git-toolbox.bat`](git-toolbox.bat) for the project's Git utility commands.
