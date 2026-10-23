@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Skills
+- `kb-search` is now fully self-contained: all scripts (`kb_search.py`, `kb_setup.py`, `kb_test.py`, `kb_setup.bat`) live inside the skill folder while KB data (kb_config.json, index, model, venv) defaults to `~/.kb` with **no env vars**; setup is idempotent (`kb_setup.py` builds venv/model/index) and the model cache is pinned to `~/.kb/model/` so disk cleanup cannot wipe it.
+- `br-jira-query`: added a cross-reference note pointing to the `br-download` skill for fetching the full BR source (WB docx); the skill itself never invokes it.
+- `br-download`: SharePoint BR lookup is parameterized via the new env vars `SP_BR_SITE` and `SP_BR_FOLDERS` (JSON array, search priority e.g. `01_OPEN_BRs` -> `05_DONE_BRs` -> `10_CANCELLED_BRs`), so BRs are found regardless of their open/done/cancelled status.
+
+### Env vars (⚠️ update local `.env.json` accordingly)
+- `KB_FOLDER` removed (KB data folder now defaults to `~/.kb`; `--kb-folder` overrides per invocation); all project-side KB vars (`KB_VAULT`, `KB_INDEX_DIR`, `KB_EMBED_MODEL`, `KB_MODEL_FOLDER`, `KB_EXCLUDE_FOLDERS`) removed
+- `SP_BR_SITE` (new) and `SP_BR_FOLDERS` (new) — see `.env.example.json`
+
 ## [v1.2.0] - 2026-10-22
 
 ### Skills (unified `br-` / `defect-` prefixes; all SKILL.md rewritten in English)

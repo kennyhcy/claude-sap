@@ -61,7 +61,7 @@ Skills serving the same task type share one prefix (`br-*` / `defect-*` / `sap-*
 |SAP knowledge/query|`sap-abc-reclassification`|Reclassify material ABC indicators by warehouse-task frequency|
 |SAP knowledge/query|`sap-note` / `sap-note-search`|SAP Note / KBA full-text read (get_sapnote.ps1) and keyword search|
 |SAP knowledge/query|`abap-adt-write`|mcp-abap-adt write tool practice (Create/Update/Activate)|
-|Knowledge base|`kb-search`|Local vector semantic search & KB Q&A over the local knowledge base (`$KB_VAULT`)|
+|Knowledge base|`kb-search`|Local vector semantic search & KB Q&A over the local knowledge base (KB data folder defaults to `~/.kb`)|
 |Bosch generic|`bosch-adaptive-slides`|Markdown to Bosch-branded HTML/PPTX/PDF slides|
 |Bosch generic|`bosch-skillhub`|Bosch SkillHub skill find/download/upload|
 |Meta skill|`skill-writer`|Conventions & sync checklist for writing/rewriting skills|
@@ -91,7 +91,7 @@ See [`CLAUDE.md`](CLAUDE.md) for details.
 
 1. Install Claude Code (CLI / Desktop / IDE extension, any one).
 2. Copy `.mcp.example.json` to `.mcp.json` and change the `args` path to the absolute path of your local mcp-abap-adt `dist/index.js`.
-3. Copy `.env.example.json` to `.env.json` and fill in your credentials (Jira/ALM tokens, knowledge-base folders `$KB_VAULT`/`$BR_FOLDER`/`$DEFECT_FOLDER`/`$DOCUPEDIA_FOLDER`, proxy).
+3. Copy `.env.example.json` to `.env.json` and fill in your credentials (Jira/ALM tokens, knowledge-base folders `$BR_FOLDER`/`$DEFECT_FOLDER`/`$DOCUPEDIA_FOLDER`, proxy). The kb-search skill needs no env var — its data folder defaults to `~/.kb`.
 4. Make sure you are logged on to SAP S/4 HANA (mcp-abap-adt connection config in `.systems.json`).
 5. Run `px_claude_sap.bat` (or start Claude Code in the project directory) so the env vars are injected.
 6. Ask questions in the conversation; the main Claude routes automatically to the proper agent or workflow.

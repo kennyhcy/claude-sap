@@ -38,6 +38,10 @@ curl -s -H "Authorization: Bearer $JIRA_TOKEN" -H "Accept: application/json" \
   "$JIRA_BASE_URL/search?jql=project%3D%27%24JIRA_PROJECT%27%20AND%20<rest>&startAt=0&maxResults=20"
 ```
 
+## Related Skills (cross-reference only)
+
+- The full BR source (WB docx) can be fetched and merged into the BR note via the `br-download` skill. This skill does not invoke it and never calls it directly; mention it to the user when the BR note lacks the original content.
+
 ## Parsing
 
 - Key fields under `fields`: `summary`, `description` (plain text), `status.name`, `issuetype.name`, `assignee.displayName`, `reporter.displayName`, `fixVersions[].name`, `labels`.

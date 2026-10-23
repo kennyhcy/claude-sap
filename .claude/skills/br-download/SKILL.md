@@ -5,7 +5,7 @@ description: Download the latest WB (Work Book) docx of a BR from SharePoint (SA
 
 # BR WB Download & Incremental Sync
 
-Download the WB docx from SharePoint folder `01_OPEN_BRs/BXBRSWMS-<number>/`, convert it to md, and merge it incrementally into the BR note.
+Download the WB docx of a BR from the SharePoint BR Management site (folder `BXBRSWMS-<number>/`), convert it to md, and merge it incrementally into the BR note.
 
 ## Hard Constraints
 
@@ -15,19 +15,28 @@ Download the WB docx from SharePoint folder `01_OPEN_BRs/BXBRSWMS-<number>/`, co
 
 ## SharePoint Access Mechanism
 
-- Site: `https://bosch.sharepoint.com/sites/20032140`, BR folder `Shared Documents/01_OPEN_BRs/BXBRSWMS-<number>/`.
+- Site: `https://bosch.sharepoint.com/sites/20032140`, list page `https://bosch.sharepoint.com/sites/20032140/Shared%20Documents/Forms/AllItems.aspx`.
+- A BR lives in exactly one of the top-level BR folders (configured in `$SP_BR_FOLDERS`, see below) — by BR status: open / done / cancelled. Sub-folder per BR: `BXBRSWMS-<number>/`.
 - Same principle as the sap-note skill's get_sapnote.ps1: the HttpOnly SSO cookie of a dedicated Chromium profile; headless/windowed Edge with a dedicated profile is the only reliable channel.
 - Dedicated profile: `%LOCALAPPDATA%\ClaudeSharePointProfile` (first use creates the login state via headless `--dump-dom`; if the page title is "Sign in" instead of the site name, the session expired — open the site in a windowed Edge for the user to log in once, then close it).
+
+## Env Vars
+
+- `SP_BR_SITE`: SharePoint site base URL (e.g. `https://bosch.sharepoint.com/sites/20032140`).
+- `SP_BR_FOLDERS`: JSON array of top-level BR folder names under `Shared Documents/`, ordered by search priority (e.g. `["01_OPEN_BRs","05_DONE_BRs","10_CANCELLED_BRs"]`). A BR is looked up in these folders in order; the first folder containing `BXBRSWMS-<number>/` wins.
+
+If either var is missing or empty, stop and ask the user to configure them in `.env.json`.
 
 ## Steps
 
 ### 1. Locate the BR folder and file
 
-1. Verify `BR_FOLDER` is set via Bash.
-2. Fetch the list-page DOM with `scripts/sp_fetch.ps1 -Url "<folder AllItems.aspx URL>"` (headless Edge --dump-dom):
-   `https://bosch.sharepoint.com/sites/20032140/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2F20032140%2FShared%20Documents%2F01%5FOPEN%5FBRs%2FBXBRSWMS%2D<number>`
+1. Verify `BR_FOLDER`, `SP_BR_SITE`, `SP_BR_FOLDERS` are set via Bash.
+2. For each folder name in `$SP_BR_FOLDERS` (in order), fetch the list-page DOM of its BR sub-folder with `scripts/sp_fetch.ps1 -Url "<folder AllItems.aspx URL>"` (headless Edge --dump-dom):
+   `<SP_BR_SITE>/Shared%20Documents/Forms/AllItems.aspx?id=<URL-encoded path %2Fsites%2F...%2FShared%20Documents%2F<folder>%2FBXBRSWMS%2D<number>>`
+   Stop at the first folder where the sub-folder yields at least one `.docx`. Empty result in one folder is not an error — continue with the next folder (the BR may be done/cancelled and moved).
 3. Extract `.docx` filenames from the DOM (regex `[A-Za-z0-9_\-\.\(\)]+\.docx`, excluding URL-encoding fragments); if the title line contains "Sign in", stop and ask the user to log in first.
-4. No docx or missing folder → report as-is and stop; never guess filenames.
+4. No docx in any configured folder or no sub-folder at all → report as-is and stop; never guess filenames.
 
 ### 2. Download the docx
 

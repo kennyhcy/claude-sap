@@ -40,7 +40,7 @@ log((isBR ? 'BR ' : 'defect ') + id + '：开始分析（' + (isBR && syncWb ? '
 // ---- 通用约束（每个 agent 的 prompt 都带上许可边界）----
 const permitLine =
   '⚠️ 渠道许可（用户启动前已同意，超出即为违规）：\n' +
-  '- KB 本地知识库检索（$DOCUPEDIA_FOLDER，即 vault 的 6.EWM Trade Docupedia）：' + (useKb ? '允许' : '禁止') + '\n' +
+  '- KB 本地知识库检索（本地知识库，KB 数据目录默认 ~/.kb）：' + (useKb ? '允许' : '禁止') + '\n' +
   '- MCP 只读查 SAP（mcp-abap-adt-b 只读工具，严禁 CreateObject/UpdateObjectSource/ActivateObject）：' + (useMcp ? '允许' : '禁止') + '\n' +
   '- SAP Note / KBA 检索（sap-note / sap-note-search skill）：' + (useSapNote ? '允许' : '禁止') + '\n' +
   '- 网络查找（WebSearch/WebFetch 任何联网检索）：' + (useWeb ? '允许' : '禁止') + '\n' +
@@ -135,7 +135,7 @@ if (useKb) {
     permitLine +
     '任务：针对下面' + (isBR ? 'BR' : 'defect') + ' ' + id + ' 的内容，检索本地知识库回答相关概念/流程/配置问题。\n' +
     '必做前置：Read 并完整阅读 .claude/skills/kb-search/SKILL.md。\n' +
-    '检索范围严格遵守渠道许可：优先用 kb-search CLI 对 vault 全库与 $DOCUPEDIA_FOLDER 做向量语义检索；CLI 未命中或结果可疑时用 Grep/Glob 对 $DOCUPEDIA_FOLDER 精确补查；网络查找' + (useWeb ? '允许，仅在前两级未命中且确有必要时使用' : '被禁止，前两级未命中就如实报告未命中') + '。\n' +
+    '检索范围严格遵守渠道许可：优先用 kb-search CLI 对 vault 全库做向量语义检索；CLI 未命中或结果可疑时用 Grep/Glob 精确补查；网络查找' + (useWeb ? '允许，仅在前两级未命中且确有必要时使用' : '被禁止，前两级未命中就如实报告未命中') + '。\n' +
     notePathLine +
     '笔记内容（已代读，直接用作上下文）：\n<<<NOTE\n' + noteContent + '\nNOTE>>>\n\n' +
     '返回：检索命中的知识点与来源文档；未命中如实说明。',

@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-"""kb_search.py — 知识库 ($KB_VAULT) 本地向量 RAG 检索 CLI.
+"""kb_search.py — 自包含 kb 文件夹内的本地向量 RAG 检索 CLI.
 
-语料: 整个知识库根目录 (KB_VAULT) + DOCUPEDIA_FOLDER 目录 (通常在其内).
+本脚本随 kb-search skill 分发 (位于 skill 目录); KB 数据 (config/索引/模型)
+默认在 ~/.kb (kb_setup.py 初始化时创建), 配置读 ~/.kb/kb_config.json:
+vault (必填) / model (可选).
 全程本地计算 (fastembed/onnxruntime CPU), 语料不外发.
 
 用法:
   python kb_search.py query "补货策略怎么配置" [--k 8] [--min-score 0.35] [--files] [--json]
   python kb_search.py rebuild [--full]
+初始化 (venv/模型/索引) 用同目录 kb_setup.py.
 """
 from __future__ import annotations
 
@@ -24,23 +27,29 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-# --- 路径解析: 脚本位于 <project>/kb/kb_search.py ---
-SCRIPT_DIR = Path(__file__).resolve().parent
+# --- 路径: KB 数据目录默认 ~/.kb (可用 --kb-folder 覆盖); 脚本自身随 skill 分发 ---
+KB_DIR = Path.home() / ".kb"
+CONFIG_FILE = KB_DIR / "kb_config.json"
+if not CONFIG_FILE.exists():
+    sys.stderr.write(f"ERROR: {CONFIG_FILE} not found. Run kb_setup.py first (see skill README).\n")
+    sys.exit(2)
+_config = json.load(open(CONFIG_FILE, encoding="utf-8"))
 
-# --- 环境变量 (与 .env.json 同名, 未设置用默认) ---
-VAULT = os.environ.get("KB_VAULT") or r"C:\Users\ukh1sgh\OneDrive - Bosch Group\Root\myNotes\MyNotes"
-INDEX_DIR = Path(os.environ.get("KB_INDEX_DIR") or (SCRIPT_DIR / "index"))
-MODEL_NAME = os.environ.get("KB_EMBED_MODEL") or "Qwen/Qwen3-Embedding-0.6B-Q"
-# 额外排除目录 (逗号分隔目录名)
-EXTRA_EXCLUDE = [s.strip() for s in (os.environ.get("KB_EXCLUDE_FOLDERS") or "").split(",") if s.strip()]
+VAULT = _config.get("vault")
+if not VAULT:
+    sys.stderr.write("ERROR: ~/.kb/kb_config.json: 'vault' is empty. Set your knowledge-base root directory.\n")
+    sys.exit(2)
+if not Path(VAULT).is_dir():
+    sys.stderr.write(f"ERROR: kb_config.json: vault directory does not exist: {VAULT}\n")
+    sys.exit(2)
+
+MODEL_NAME = _config.get("model") or "Qwen/Qwen3-Embedding-0.6B-Q"
+INDEX_DIR = KB_DIR / "index"
+# 模型缓存目录 (fastembed 默认放 %TEMP%, 会被存储感知/磁盘清理删除; 固定到 ~/.kb/model)
+MODEL_CACHE = str(KB_DIR / "model")
 
 # 固定排除目录 (附件/配置/模板)
 EXCLUDE_DIRS = {"_attachments", "_template", ".obsidian", ".claude", ".claudian", ".trash", "node_modules", ".venv"}
-EXCLUDE_DIRS.update(EXTRA_EXCLUDE)
-
-# Docupedia 库 (docupedia-download skill 落盘处, DOCUPEDIA_FOLDER 指定),
-# 默认即知识库根目录的子目录, 在根目录扫描已覆盖时不必重复索引
-DOCUPEDIA_DIR = os.environ.get("DOCUPEDIA_FOLDER") or ""
 
 # scope -> 知识库子目录前缀 (供 --scope 过滤; 默认 all 不过滤)
 SCOPES = {
@@ -190,7 +199,7 @@ def chunk_file(path: Path, rel: str) -> list[dict]:
     meta.update(dmeta)
     text = clean_text(text)
 
-    vault_name = rel.split(os.sep)[0].split("/")[0] if (os.sep in rel or "/" in rel) else "Docupedia KB"
+    vault_name = rel.split(os.sep)[0].split("/")[0] if (os.sep in rel or "/" in rel) else "KB"
 
     chunks: list[dict] = []
     for heading, sec in iter_sections(text):
@@ -249,17 +258,12 @@ def chunk_hash(c: dict) -> str:
 # ============================ 文件扫描 ============================
 
 def iter_md_files() -> list[Path]:
-    roots = [Path(VAULT)]
-    if DOCUPEDIA_DIR and not str(Path(DOCUPEDIA_DIR)).startswith(str(Path(VAULT))):
-        # DOCUPEDIA_FOLDER 在知识库根目录之外时才追加为独立语料根, 在其内则已被扫描覆盖
-        roots.append(Path(DOCUPEDIA_DIR))
     files: list[Path] = []
-    for root in roots:
-        for dirpath, dirnames, filenames in os.walk(root):
-            dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-            for fn in filenames:
-                if fn.lower().endswith(".md"):
-                    files.append(Path(dirpath) / fn)
+    for dirpath, dirnames, filenames in os.walk(VAULT):
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
+        for fn in filenames:
+            if fn.lower().endswith(".md"):
+                files.append(Path(dirpath) / fn)
     return files
 
 
@@ -317,7 +321,7 @@ def get_model():
         so.inter_op_num_threads = 1
         so.enable_cpu_mem_arena = False
         so.log_severity_level = 3
-        EMBED_MODEL = TextEmbedding(MODEL_NAME)
+        EMBED_MODEL = TextEmbedding(MODEL_NAME, cache_dir=MODEL_CACHE)
         EMBED_MODEL.model.model = _ort.InferenceSession(
             str(EMBED_MODEL.model.model._model_path), sess_options=so
         )
@@ -438,13 +442,18 @@ def load_index() -> tuple[list[dict], "np.ndarray"]:
     return chunks, vecs
 
 
-def do_query(query: str, k: int, min_score: float, files_only: bool, as_json: bool, scope: str | None) -> None:
+# 索引元信息 (kb_test.py 等 embedder 复用方读取; do_query 首次运行后填充)
+STATE = {"n_chunks": 0}
+
+
+def search(query: str, k: int = 8, min_score: float = 0.35, scope: str | None = None) -> list[tuple[float, dict]]:
+    """核心检索: 返回 [(score, chunk), ...] (供 CLI 与 kb_test.py 共用)."""
     import numpy as np
     incremental()
     chunks, vecs = load_index()
     if not chunks:
-        print("索引为空. 请执行: python kb/kb_search.py rebuild", file=sys.stderr)
         sys.exit(2)
+    STATE["n_chunks"] = len(chunks)
     qv = embed_texts([query])[0]
     sims = vecs @ qv
     order = np.argsort(-sims)
@@ -458,7 +467,11 @@ def do_query(query: str, k: int, min_score: float, files_only: bool, as_json: bo
         results.append((float(sims[int(i)]), c))
         if len(results) >= k:
             break
-    results = [(s, c) for s, c in results if s >= min_score]
+    return [(s, c) for s, c in results if s >= min_score]
+
+
+def do_query(query: str, k: int, min_score: float, files_only: bool, as_json: bool, scope: str | None) -> None:
+    results = search(query, k=k, min_score=min_score, scope=scope)
 
     if as_json:
         print(json.dumps([{
