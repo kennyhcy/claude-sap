@@ -11,7 +11,13 @@ Create and find Business Request notes in the folder set by the env var `BR_FOLD
 
 Input normally comes from the work-list workflow: BR number, title, description, reply list.
 
-Naming: folder and md filename always use the short form `BR xxxx Title` (no `BXBRSWMS-` prefix). Keep the number as-is, including letter suffixes (e.g. `BR 2224a`).
+Naming: folder and md filename always use the short form `BR xxxx Title` (no `BXBRSWMS-` prefix). **Zero-pad the number to 4 digits to match the SharePoint folder convention** (BR 129 → `BR 0129 ...`, BR 42 → `BR 0042 ...`), keeping letter suffixes (e.g. `BR 2224a`); `br_id` in the metadata block uses the same zero-padded value.
+
+## Language Rule (mandatory)
+
+- **Never translate BR content.** The BR's original language (Jira summary/description/comments, WB docx, SharePoint documents) is the note's language — write PR/PS/Scope etc. in that original language, quoting text verbatim wherever possible.
+- Do not paraphrase requirement items ([Cust. Req. n], [Prod. Req. n], [Acpt. Crit. n]) or table/form/FM names; keep original wording, only trim obvious boilerplate (page headers, "All versions on paper are copies only").
+- Sections the BR does not provide content for (e.g. Analysis, written by br-analyze) may use whatever language the working conversation uses; but any quoted BR source text stays verbatim.
 
 ## Path Rules (important)
 

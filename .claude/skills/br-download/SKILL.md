@@ -17,6 +17,7 @@ Download the WB docx of a BR from the SharePoint BR Management site (folder `BXB
 
 - Site: `https://bosch.sharepoint.com/sites/20032140`, list page `https://bosch.sharepoint.com/sites/20032140/Shared%20Documents/Forms/AllItems.aspx`.
 - A BR lives in exactly one of the top-level BR folders (configured in `$SP_BR_FOLDERS`, see below) — by BR status: open / done / cancelled. Sub-folder per BR: `BXBRSWMS-<number>/`.
+- **BR number must be zero-padded to 4 digits** for all SharePoint paths (folder name and file URLs): BR 412 → `BXBRSWMS-0412`, BR 129 → `BXBRSWMS-0129`, BR 2211 → `BXBRSWMS-2211`. Jira keys (`BXBRSWMS-412`) are NOT zero-padded — pad only when building SharePoint URLs.
 - Same principle as the sap-note skill's get_sapnote.ps1: the HttpOnly SSO cookie of a dedicated Chromium profile; headless/windowed Edge with a dedicated profile is the only reliable channel.
 - Dedicated profile: `%LOCALAPPDATA%\ClaudeSharePointProfile` (first use creates the login state via headless `--dump-dom`; if the page title is "Sign in" instead of the site name, the session expired — open the site in a windowed Edge for the user to log in once, then close it).
 
@@ -33,9 +34,11 @@ If either var is missing or empty, stop and ask the user to configure them in `.
 
 1. Verify `BR_FOLDER`, `SP_BR_SITE`, `SP_BR_FOLDERS` are set via Bash.
 2. For each folder name in `$SP_BR_FOLDERS` (in order), fetch the list-page DOM of its BR sub-folder with `scripts/sp_fetch.ps1 -Url "<folder AllItems.aspx URL>"` (headless Edge --dump-dom):
-   `<SP_BR_SITE>/Shared%20Documents/Forms/AllItems.aspx?id=<URL-encoded path %2Fsites%2F...%2FShared%20Documents%2F<folder>%2FBXBRSWMS%2D<number>>`
+   `<SP_BR_SITE>/Shared%20Documents/Forms/AllItems.aspx?id=<URL-encoded path %2Fsites%2F...%2FShared%20Documents%2F<folder>%2FBXBRSWMS%2D<zero-padded number>>`
+   More reliable (avoids the async-loaded list-page DOM): query the folder REST API the same way — `.../_api/web/GetFolderByServerRelativeUrl(%27/sites/20032140/Shared%20Documents/<folder>/BXBRSWMS-0NNN%27)/Files` — and read `<d:Name>` entries from the XML dump.
    Stop at the first folder where the sub-folder yields at least one `.docx`. Empty result in one folder is not an error — continue with the next folder (the BR may be done/cancelled and moved).
-3. Extract `.docx` filenames from the DOM (regex `[A-Za-z0-9_\-\.\(\)]+\.docx`, excluding URL-encoding fragments); if the title line contains "Sign in", stop and ask the user to log in first.
+3. Extract filenames from the DOM/REST XML. Beware: the AllItems.aspx list page loads its file list asynchronously — the dumped DOM may contain no filenames at all even when files exist; prefer the REST API variant. WB may come as `.docx`, `.pdf` or `.txt` — accept all three. If the title line contains "Sign in", stop and ask the user to log in first.
+   Edge profile conflict: if a windowed Edge is running on the same profile, headless start fails (exit=21); ask the user to close it first.
 4. No docx in any configured folder or no sub-folder at all → report as-is and stop; never guess filenames.
 
 ### 2. Download the docx
@@ -56,7 +59,7 @@ Read the converted file in full. Fixed WB sections: History / General informatio
 
 Glob `$BR_FOLDER` (including `_Closed/`) for `BR <number>*`; if the note is missing, create the skeleton following the br-note skill's template (the workflow/main session invokes br-note; this skill does not call other skills), then do a full fill (no existing content to protect).
 
-When the note exists, compare the WB md against the note section by section and merge in the direction "WB → note", **append-only**:
+When the note exists, compare the WB md against the note section by section and merge in the direction "WB → note", **append-only**. **Language rule (mandatory): never translate — the WB's original language is authoritative; merged WB content (requirement items, [Comment]s, table/form/FM names) goes into the note verbatim in the original language; do not paraphrase or render it in another language.**
 
 | WB section | Note target | Rule |
 |---|---|---|

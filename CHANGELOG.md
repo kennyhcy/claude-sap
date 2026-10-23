@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Skills
+- `br-download` / `br-note`: BR number zero-padding rule — SharePoint paths and note folder/`br_id` use 4-digit zero-padded numbers (`BXBRSWMS-0412`, `BR 0129 ...`); Jira keys stay unpadded. Note merging now carries a mandatory language rule: never translate, WB/Jira original wording is merged verbatim.
+- `br-download`: REST API variant documented for folder listing (`_api/web/GetFolderByServerRelativeUrl(...)/Files`) — the AllItems.aspx DOM loads its file list asynchronously and may contain no filenames; WB may come as `.docx`/`.pdf`/`.txt`; headless Edge fails (exit=21) when a windowed Edge holds the same profile.
+- `br-note`: added Language Rule section (BR original language is the note language; requirement items and object names verbatim; Analysis sections exempt).
+
+### Skills (carried over from earlier, unreleased)
 - `kb-search` is now fully self-contained: all scripts (`kb_search.py`, `kb_setup.py`, `kb_test.py`, `kb_setup.bat`) live inside the skill folder while KB data (kb_config.json, index, model, venv) defaults to `~/.kb` with **no env vars**; setup is idempotent (`kb_setup.py` builds venv/model/index) and the model cache is pinned to `~/.kb/model/` so disk cleanup cannot wipe it.
 - `br-jira-query`: added a cross-reference note pointing to the `br-download` skill for fetching the full BR source (WB docx); the skill itself never invokes it.
 - `br-download`: SharePoint BR lookup is parameterized via the new env vars `SP_BR_SITE` and `SP_BR_FOLDERS` (JSON array, search priority e.g. `01_OPEN_BRs` -> `05_DONE_BRs` -> `10_CANCELLED_BRs`), so BRs are found regardless of their open/done/cancelled status.
